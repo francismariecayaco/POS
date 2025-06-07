@@ -502,9 +502,13 @@ function showProfileModal() {
       if (role === 'user') {
         document.getElementById('profilePosition').readOnly = true;
         document.getElementById('profileDepartment').readOnly = true;
+        document.getElementById('profileBranch').readOnly = true; // <-- Add this line
+        document.getElementById('profileCompany').readOnly = true; // (optional, if you want company locked too)
       } else {
         document.getElementById('profilePosition').readOnly = false;
         document.getElementById('profileDepartment').readOnly = false;
+        document.getElementById('profileBranch').readOnly = false; // <-- Admins can edit
+        document.getElementById('profileCompany').readOnly = false;
       }
     } else {
       document.getElementById('profileEmail').value = auth.currentUser.email || '';
@@ -724,6 +728,10 @@ function loadEndUserTabs() {
 }
 
 async function loadAdminTabs() {
+  // Clear previous tabs and content
+  roleTabs.innerHTML = '';
+  roleContent.innerHTML = '';
+
   const attendanceBtn = document.createElement('button');
   attendanceBtn.textContent = 'Attendance Logs';
   attendanceBtn.className = 'px-4 py-2 bg-green-100 rounded';
@@ -1185,6 +1193,18 @@ window.viewEmployeeProfile = async function(uid) {
   `;
 };
 
+// Approve product handler for admin
+window.approveProduct = async function(productId) {
+  try {
+    await updateDoc(doc(db, 'products', productId), { approved: true });
+    alert('Product approved!');
+    // Optionally reload the approve products tab
+    if (typeof loadAdminTabs === 'function') loadAdminTabs();
+  } catch (err) {
+    alert('Failed to approve product: ' + err.message);
+  }
+};
+
 function hidePosPanels() {
   document.getElementById('addProductPanel').classList.add('hidden');
   document.getElementById('sellProductPanel').classList.add('hidden');
@@ -1502,6 +1522,7 @@ async function loadSellableProductsForRole({ company = null, allCompanies = fals
   renderSellItems();
 }
 </script>
+
 
 </body>
 </html>
